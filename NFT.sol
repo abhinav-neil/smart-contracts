@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
@@ -12,7 +14,7 @@ contract NFT is ERC721Enumerable, Ownable {
   uint public maxSupply = 10000;
   uint public maxMintAmount = 10;
   uint public maxTokensOfOwner = 20;
-  bool public paused = true;
+  bool public saleIsActive = true;
 
   constructor(
     string memory _name,
@@ -32,7 +34,7 @@ contract NFT is ERC721Enumerable, Ownable {
   // public
   function mint(address _to, uint _mintAmount) public payable {
     uint supply = totalSupply();
-    require(!paused, 'Sale is paused');
+    require(saleIsActive, 'Sale is not active');
     require(_mintAmount > 0, 'You must mint at least 1 NFT');
     require(_mintAmount <= maxMintAmount, 'You cannot mint more than 10 NFTs at a time');
     require(supply + _mintAmount <= maxSupply, 'Not enough supply');
@@ -91,8 +93,8 @@ contract NFT is ERC721Enumerable, Ownable {
     baseExtension = _newBaseExtension;
   }
 
-  function pause(bool _state) public onlyOwner {
-    paused = _state;
+  function flipSaleState() public onlyOwner {
+    saleIsActive = !saleIsActive;
   }
  
   function withdraw() public payable onlyOwner {

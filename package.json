@@ -9,9 +9,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "prettier": {
-    "singleQuote": true
-  },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2"
   }
