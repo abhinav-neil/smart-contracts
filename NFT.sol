@@ -14,7 +14,7 @@ contract NFT is ERC721Enumerable, Ownable {
   uint public maxSupply = 10000;
   uint public maxMintAmount = 10;
   uint public maxTokensOfOwner = 20;
-  bool public saleIsActive = true;
+  bool public saleIsActive;
 
   constructor(
     string memory _name,
@@ -23,7 +23,9 @@ contract NFT is ERC721Enumerable, Ownable {
     uint _initSupply
   ) ERC721(_name, _symbol) {
     setBaseURI(_initBaseURI);
-    mint(msg.sender, _initSupply);
+    for (uint i = 1; i <= _initSupply; i++) {
+      _safeMint(msg.sender, totalSupply() + 1);
+    }
   }
 
   // internal
@@ -32,16 +34,18 @@ contract NFT is ERC721Enumerable, Ownable {
   }
 
   // public
-  function mint(address _to, uint _mintAmount) public payable {
+  function mint(uint _mintAmount) public payable {
     uint supply = totalSupply();
     require(saleIsActive, 'Sale is not active');
     require(_mintAmount > 0, 'You must mint at least 1 NFT');
     require(_mintAmount <= maxMintAmount, 'You cannot mint more than 10 NFTs at a time');
     require(supply + _mintAmount <= maxSupply, 'Not enough supply');
-    require(balanceOf(_to) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 20 NFTs');
-    require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
+    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 20 NFTs');
+    if (msg.sender != owner()) {
+        require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
+    }
     for (uint i = 1; i <= _mintAmount; i++) {
-      _safeMint(_to, supply + i);
+      _safeMint(msg.sender, supply + i);
     }
   }
 
