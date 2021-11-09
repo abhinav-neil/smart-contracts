@@ -1,0 +1,1 @@
+## A library of solidity smart contracts for common use cases
