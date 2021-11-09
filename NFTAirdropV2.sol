@@ -1,31 +1,25 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.7;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
-contract NFT is ERC721Enumerable, Ownable {
+contract NFTAirdropV2 is ERC721Enumerable, Ownable {
   using Strings for uint;
 
   string public baseURI;
   string public baseExtension = '';
-  uint public price = 0.01 ether;
   uint public maxSupply = 10000;
-  uint public maxMintAmount = 10;
-  uint public maxTokensOfOwner = 20;
-  bool public saleIsActive;
+  bool public airdropIsActive; 
 
+  mapping(address => uint) public recipients;
+  
   constructor(
     string memory _name,
     string memory _symbol,
-    string memory _initBaseURI,
-    uint _initSupply
+    string memory _initBaseURI
   ) ERC721(_name, _symbol) {
     setBaseURI(_initBaseURI);
-    for (uint i = 1; i <= _initSupply; i++) {
-      _safeMint(msg.sender, totalSupply() + 1);
-    }
   }
 
   // internal
@@ -34,17 +28,13 @@ contract NFT is ERC721Enumerable, Ownable {
   }
 
   // public
-  function mint(uint _mintAmount) public payable {
+  function claim() public {
     uint supply = totalSupply();
-    require(saleIsActive, 'Sale is not active');
-    require(_mintAmount > 0, 'You must mint at least 1 NFT');
-    require(_mintAmount <= maxMintAmount, 'You cannot mint more than 10 NFTs at a time');
-    require(supply + _mintAmount <= maxSupply, 'Not enough supply');
-    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 20 NFTs');
-    if (msg.sender != owner()) {
-        require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
-    }
-    for (uint i = 1; i <= _mintAmount; i++) {
+    uint amount = recipients[msg.sender];
+    require(airdropIsActive, 'Airdrop is not active');
+    require(amount > 0, 'You are not listed for airdrops');
+    require(supply + amount <= maxSupply, 'Not enough supply');
+    for (uint i = 1; i <= amount; i++) {
       _safeMint(msg.sender, supply + i);
     }
   }
@@ -81,14 +71,6 @@ contract NFT is ERC721Enumerable, Ownable {
   }
 
   //only owner
-  function setPrice(uint _newPrice) public onlyOwner() {
-    price = _newPrice;
-  }
-
-  function setmaxMintAmount(uint _newmaxMintAmount) public onlyOwner() {
-    maxMintAmount = _newmaxMintAmount;
-  }
-
   function setBaseURI(string memory _newBaseURI) public onlyOwner {
     baseURI = _newBaseURI;
   }
@@ -97,12 +79,15 @@ contract NFT is ERC721Enumerable, Ownable {
     baseExtension = _newBaseExtension;
   }
 
-  function flipSaleState() public onlyOwner {
-    saleIsActive = !saleIsActive;
+  function flipAirdropState() public onlyOwner {
+    airdropIsActive = !airdropIsActive;
   }
- 
-  function withdraw() public payable onlyOwner {
-    (bool success, ) = payable(msg.sender).call{value: address(this).balance}('');
-    require(success);
+
+  function setRecipients(address[] memory _recipients, uint[] memory _amounts) external onlyOwner {
+    require(_recipients.length == _amounts.length, 'Recipients and amounts array have to be of same size');
+    for(uint i = 0; i < _recipients.length; i++) {
+        recipients[_recipients[i]] = _amounts[i];
+    }
   }
+
 }
