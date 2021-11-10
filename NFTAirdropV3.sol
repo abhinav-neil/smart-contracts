@@ -37,9 +37,9 @@ contract NFTAirdropV3 is Ownable {
     isWhitelistedForAirdrop[msg.sender] = false;
   }
   
-  function setAirdropNFT(address _nft, uint _startingIndex, uint _maxTokenId) public onlyOwner {
+  function setAirdropNFT(address _nft, uint _startingTokenId, uint _maxTokenId) public onlyOwner {
       nft = _nft;
-      tokenId = _startingIndex;
+      tokenId = _startingTokenId;
       maxTokenId = _maxTokenId;
   }
     
