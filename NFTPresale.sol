@@ -13,8 +13,9 @@ contract NFT is ERC721Enumerable, Ownable {
   string public baseExtension = '';
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
-  uint public maxMintAmount = 10;
-  uint public maxTokensOfOwner = 3;
+  uint public maxMintAmount = 5;
+  uint public maxPresaleMintAmount = 1;
+  uint public maxTokensOfOwner = 10;
   uint public saleState;        // Sale status, 0 = inactive, 1 = presale, 2 = open for all
   mapping(address => bool) public isWhitelisted;
 
@@ -30,12 +31,12 @@ contract NFT is ERC721Enumerable, Ownable {
     }
   }
 
-  // internal
+  
   function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
   }
 
-  // public
+  
   function mint(uint _mintAmount) public payable {
     require(saleState != 0, 'Sale is not active');
     uint supply = totalSupply();
@@ -44,9 +45,10 @@ contract NFT is ERC721Enumerable, Ownable {
     if (msg.sender != owner()) {
         if(saleState == 1) {
             require(isWhitelisted[msg.sender], 'Only whitelisted users allowed during presale');
+            require(_mintAmount <= maxPresaleMintAmount, 'You cannot mint more than 1 NFT during presale');
         }
-        require(_mintAmount <= maxMintAmount, 'You cannot mint more than 10 NFTs at a time');
-        require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 20 NFTs');
+        require(_mintAmount <= maxMintAmount, 'You cannot mint more than 5 NFTs at a time');
+        require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 10 NFTs');
         require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
     }
 
@@ -87,13 +89,17 @@ contract NFT is ERC721Enumerable, Ownable {
         : "";
   }
 
-  //only owner
+  
   function setPrice(uint _newPrice) public onlyOwner() {
     price = _newPrice;
   }
 
   function setMaxMintAmount(uint _newMaxMintAmount) public onlyOwner() {
     maxMintAmount = _newMaxMintAmount;
+  }
+
+  function setmaxPresaleMintAmount(uint _newmaxPresaleMintAmount) public onlyOwner() {
+    maxPresaleMintAmount = _newmaxPresaleMintAmount;
   }
 
   function setBaseURI(string memory _newBaseURI) public onlyOwner {

@@ -34,12 +34,12 @@ contract NFT is ERC721Enumerable, Ownable {
     }
   }
 
-  // internal
+  
   function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
   }
 
-  // public
+  
   function mint(uint _mintAmount) public payable {
     require(saleState != 0, 'Sale is not active');
     uint supply = totalSupply();
@@ -95,7 +95,7 @@ contract NFT is ERC721Enumerable, Ownable {
         : "";
   }
 
-  //only owner
+  
   function reveal() public onlyOwner() {
       revealed = true;
   }

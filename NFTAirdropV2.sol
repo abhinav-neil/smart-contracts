@@ -22,12 +22,12 @@ contract NFTAirdropV2 is ERC721Enumerable, Ownable {
     setBaseURI(_initBaseURI);
   }
 
-  // internal
+  
   function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
   }
 
-  // public
+  
   function claim() public {
     uint supply = totalSupply();
     uint amount = recipients[msg.sender];
@@ -70,7 +70,7 @@ contract NFTAirdropV2 is ERC721Enumerable, Ownable {
         : '';
   }
 
-  //only owner
+  
   function setBaseURI(string memory _newBaseURI) public onlyOwner {
     baseURI = _newBaseURI;
   }

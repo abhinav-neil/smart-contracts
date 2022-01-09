@@ -9,11 +9,11 @@ contract NFT is ERC721Enumerable, Ownable {
   using Strings for uint;
 
   string public baseURI;
-  string public baseExtension = '';
+  string public baseExtension;
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
-  uint public maxMintAmount = 10;
-  uint public maxTokensOfOwner = 3;
+  uint public maxMintAmount = 3;
+  uint public maxTokensOfOwner = 10;
   bool public saleIsActive;
 
   constructor(
@@ -28,19 +28,17 @@ contract NFT is ERC721Enumerable, Ownable {
     }
   }
 
-  // internal
   function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
   }
-
-  // public
+  
   function mint(uint _mintAmount) public payable {
     uint supply = totalSupply();
     require(saleIsActive, 'Sale is not active');
     require(_mintAmount > 0, 'You must mint at least 1 NFT');
-    require(_mintAmount <= maxMintAmount, 'You cannot mint more than 10 NFTs at a time');
+    require(_mintAmount <= maxMintAmount, 'Max mint amount limit exceeded');
     require(supply + _mintAmount <= maxSupply, 'Not enough supply');
-    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 20 NFTs');
+    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'Max tokens per address limit exceeded');
     if (msg.sender != owner()) {
         require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
     }
@@ -79,8 +77,7 @@ contract NFT is ERC721Enumerable, Ownable {
         ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
         : '';
   }
-
-  //only owner
+  
   function setPrice(uint _newPrice) public onlyOwner() {
     price = _newPrice;
   }

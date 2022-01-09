@@ -8,3 +8,4 @@ if (_id <= 1000 ){
     return   0.3 ether;
 }
 }
+

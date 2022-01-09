@@ -1,3 +1,7 @@
 ## Args
 
 - baseuri: https://opensea-creatures-api.herokuapp.com/api/creature/
+
+## Deploys
+
+- NFT V2: https://rinkeby.etherscan.io/address/0x7a28d788d7f7a81c5f3f06f7da175e380c3017dc

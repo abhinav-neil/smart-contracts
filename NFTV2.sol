@@ -4,18 +4,17 @@ pragma solidity ^0.8.7;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import "@openzeppelin/contracts/utils/Counters.sol";
+import '@openzeppelin/contracts/utils/Counters.sol';
 
 contract NFT is ERC721Enumerable, Ownable {
   using Strings for uint;
   using Counters for Counters.Counter;
 
   string public baseURI;
-  string public baseExtension = '';
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
-  uint public maxMintAmount = 10;
-  uint public maxTokensOfOwner = 3;
+  uint public maxMintAmount = 3;
+  uint public maxTokensOfOwner = 10;
   bool public saleIsActive;
   Counters.Counter private _tokenId;
 
@@ -27,7 +26,7 @@ contract NFT is ERC721Enumerable, Ownable {
   ) ERC721(_name, _symbol) {
     setBaseURI(_initBaseURI);
     for (uint i = 1; i <= _initSupply; i++) {
-      _safeMint(msg.sender, totalSupply() + 1);
+      _safeMint(msg.sender, _tokenId.current() + i);
     }
   }
 
@@ -38,9 +37,9 @@ contract NFT is ERC721Enumerable, Ownable {
   function mint(uint _mintAmount) public payable {
     require(saleIsActive, 'Sale is not active');
     require(_mintAmount > 0, 'You must mint at least 1 NFT');
-    require(_mintAmount <= maxMintAmount, 'You cannot mint more than 10 NFTs at a time');
+    require(_mintAmount <= maxMintAmount, 'Max mint amount limit exceeded');
     require(_tokenId.current() + _mintAmount < maxSupply, 'Not enough supply');
-    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'You cannot have more than 20 NFTs');
+    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'Max tokens per address limit exceeded');
     if (msg.sender != owner()) {
         require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
     }
@@ -63,24 +62,6 @@ contract NFT is ERC721Enumerable, Ownable {
     return tokenIds;
   }
 
-  function tokenURI(uint tokenId)
-    public
-    view
-    virtual
-    override
-    returns (string memory)
-  {
-    require(
-      _exists(tokenId),
-      'ERC721Metadata: URI query for nonexistent token'
-    );
-
-    string memory currentBaseURI = _baseURI();
-    return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
-        : '';
-  }
-
   function setPrice(uint _newPrice) public onlyOwner() {
     price = _newPrice;
   }
@@ -91,10 +72,6 @@ contract NFT is ERC721Enumerable, Ownable {
 
   function setBaseURI(string memory _newBaseURI) public onlyOwner {
     baseURI = _newBaseURI;
-  }
-
-  function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
-    baseExtension = _newBaseExtension;
   }
 
   function flipSaleState() public onlyOwner {
