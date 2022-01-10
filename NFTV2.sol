@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.7;
 
-import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts/utils/Counters.sol';
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFT is ERC721Enumerable, Ownable {
   using Strings for uint;
@@ -19,15 +19,9 @@ contract NFT is ERC721Enumerable, Ownable {
   Counters.Counter private _tokenId;
 
   constructor(
-    string memory _name,
-    string memory _symbol,
-    string memory _initBaseURI,
-    uint _initSupply
-  ) ERC721(_name, _symbol) {
+    string memory _initBaseURI
+  ) ERC721("NFT", "NFT") {
     setBaseURI(_initBaseURI);
-    for (uint i = 1; i <= _initSupply; i++) {
-      _safeMint(msg.sender, _tokenId.current() + i);
-    }
   }
 
   function _baseURI() internal view virtual override returns (string memory) {
@@ -35,13 +29,13 @@ contract NFT is ERC721Enumerable, Ownable {
   }
 
   function mint(uint _mintAmount) public payable {
-    require(saleIsActive, 'Sale is not active');
-    require(_mintAmount > 0, 'You must mint at least 1 NFT');
-    require(_mintAmount <= maxMintAmount, 'Max mint amount limit exceeded');
-    require(_tokenId.current() + _mintAmount < maxSupply, 'Not enough supply');
-    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, 'Max tokens per address limit exceeded');
+    require(saleIsActive, "Sale is not active");
+    require(_mintAmount > 0, "You must mint at least 1 NFT");
+    require(_mintAmount <= maxMintAmount, "Max mint amount limit exceeded");
+    require(_tokenId.current() + _mintAmount < maxSupply, "Not enough supply");
+    require(balanceOf(msg.sender) + _mintAmount <= maxTokensOfOwner, "Max tokens per address limit exceeded");
     if (msg.sender != owner()) {
-        require(msg.value >= price * _mintAmount, 'Please send the correct amount of ETH');
+        require(msg.value >= price * _mintAmount, "Please send the correct amount of ETH");
     }
     for (uint i = 0; i < _mintAmount; i++) {
         _tokenId.increment();
@@ -79,7 +73,7 @@ contract NFT is ERC721Enumerable, Ownable {
   }
  
   function withdraw() public payable onlyOwner {
-    (bool success, ) = payable(msg.sender).call{value: address(this).balance}('');
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
     require(success);
   }
 }
