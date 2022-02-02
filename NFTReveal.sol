@@ -11,7 +11,7 @@ contract NFT is ERC721Enumerable, Ownable {
 
   string public baseURI;
   string public baseExtension = '';
-  string public hiddenURI;
+  string public notRevealedURI;
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
   uint public maxMintAmount = 10;
@@ -23,12 +23,12 @@ contract NFT is ERC721Enumerable, Ownable {
   constructor(
     string memory _name,
     string memory _symbol,
-    string memory _hiddenURI,
+    string memory _notRevealedURI,
     string memory _initBaseURI,
     uint _initSupply
   ) ERC721(_name, _symbol) {
     baseURI = _initBaseURI;
-    hiddenURI = _hiddenURI;
+    notRevealedURI = _notRevealedURI;
     for (uint i = 1; i <= _initSupply; i++) {
       _safeMint(msg.sender, totalSupply() + 1);
     }
@@ -86,7 +86,7 @@ contract NFT is ERC721Enumerable, Ownable {
     );
     
     if(!revealed) {
-        return hiddenURI;
+        return notRevealedURI;
     }
 
     string memory currentBaseURI = _baseURI();

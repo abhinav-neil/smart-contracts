@@ -1,19 +1,22 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.7;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.11;
 
 import '@openzeppelin/contracts/finance/PaymentSplitter.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
 contract WalletSplitter is PaymentSplitter, Ownable {
     
-    string public name;
+    string public name = "Wallet";
+    uint[] private _shares = [100];
+    address[] private _payees = [0x0000000000000000000000000000000000000000];
 
     constructor (
         string memory _name,
-        address[] memory _payees, 
-        uint256[] memory _shares) 
+        // address[] memory _payees, 
+        // uint256[] memory _shares
+        ) 
         PaymentSplitter(_payees, _shares) payable {
-            name = _name;
+            // name = _name;
         }
         
     function totalBalance() public view returns(uint) {
