@@ -16,7 +16,7 @@ contract NFT is ERC721Enumerable, Ownable {
   uint public maxMintAmount = 5;
   uint public maxPresaleMintAmount = 1;
   uint public maxTokensOfOwner = 10;
-  uint public saleState;        // Sale status, 0 = inactive, 1 = presale, 2 = open for all
+  uint public saleState;        // Sale status, 0 = inactive, 1 = presale, 2 = public sale
   mapping(address => bool) public isWhitelisted;
 
   constructor(

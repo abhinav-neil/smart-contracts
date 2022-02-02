@@ -127,14 +127,14 @@ contract NFT is ERC721Enumerable, Ownable {
 
   function whitelist(address[] memory _users) public onlyOwner {
       for(uint i = 0; i < _users.length; i++) {
-          require(!isWhitelisted[_users[i]], "already whitelisted");
+        //   require(!isWhitelisted[_users[i]], "already whitelisted");
           isWhitelisted[_users[i]] = true;
       }
   }
   
   function unWhitelist(address[] memory _users) public onlyOwner {
      for(uint i = 0; i < _users.length; i++) {
-          require(isWhitelisted[_users[i]], "not whitelisted");
+        //   require(isWhitelisted[_users[i]], "not whitelisted");
           isWhitelisted[_users[i]] = false;
      }
   }
