@@ -1,93 +1,45 @@
+// Airdrop from ERC-721 contract w/ WL & claim model
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.11;
 
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFTAirdropV2 is ERC721Enumerable, Ownable {
   using Strings for uint;
+  using Counters for Counters.Counter;
 
-  string public baseURI;
-  string public baseExtension = '';
   uint public maxSupply = 10000;
   bool public airdropIsActive; 
 
-  mapping(address => uint) public recipients;
-  
-  constructor(
-    string memory _name,
-    string memory _symbol,
-    string memory _initBaseURI
-  ) ERC721(_name, _symbol) {
-    setBaseURI(_initBaseURI);
-  }
+//   mapping(address => bool) public isWhitelistedForAirdrop; // same allowance for all
+  mapping(address => uint) public airdropAllowance; // variable allowance per address
 
+  Counters.Counter private _tokenId;
   
-  function _baseURI() internal view virtual override returns (string memory) {
-    return baseURI;
-  }
-
+  constructor() ERC721("NFT", "NFT") {}
   
-  function claim() public {
-    uint supply = totalSupply();
-    uint amount = recipients[msg.sender];
-    require(airdropIsActive, 'Airdrop is not active');
-    require(amount > 0, 'You are not listed for airdrops');
-    require(supply + amount <= maxSupply, 'Not enough supply');
-    for (uint i = 1; i <= amount; i++) {
-      _safeMint(msg.sender, supply + i);
+  function claimAirdrop() public {
+    uint _allowance = airdropAllowance[msg.sender];
+    require(_allowance > 0, "You have no airdrops to claim");
+    require(_tokenId.current() + _allowance <= maxSupply, "Max supply exceeded");
+    for (uint i = 0; i < _allowance; i++) {
+      _tokenId.increment();
+      _safeMint(msg.sender, _tokenId.current());
     }
-  }
-
-  function walletOfOwner(address _owner)
-    public
-    view
-    returns (uint[] memory)
-  {
-    uint ownerTokenCount = balanceOf(_owner);
-    uint[] memory tokenIds = new uint[](ownerTokenCount);
-    for (uint i; i < ownerTokenCount; i++) {
-      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-    }
-    return tokenIds;
-  }
-
-  function tokenURI(uint tokenId)
-    public
-    view
-    virtual
-    override
-    returns (string memory)
-  {
-    require(
-      _exists(tokenId),
-      'ERC721Metadata: URI query for nonexistent token'
-    );
-
-    string memory currentBaseURI = _baseURI();
-    return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
-        : '';
-  }
-
-  
-  function setBaseURI(string memory _newBaseURI) public onlyOwner {
-    baseURI = _newBaseURI;
-  }
-
-  function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
-    baseExtension = _newBaseExtension;
+    airdropAllowance[msg.sender] = 0;
   }
 
   function flipAirdropState() public onlyOwner {
     airdropIsActive = !airdropIsActive;
   }
 
-  function setRecipients(address[] memory _recipients, uint[] memory _amounts) external onlyOwner {
-    require(_recipients.length == _amounts.length, 'Recipients and amounts array have to be of same size');
-    for(uint i = 0; i < _recipients.length; i++) {
-        recipients[_recipients[i]] = _amounts[i];
-    }
+  function setAirdropAllowance(address[] memory _users, uint[] memory _allowances) public onlyOwner {
+      require(_users.length == _allowances.length, "Length mismatch");
+      for(uint i = 0; i < _users.length; i++) {
+          airdropAllowance[_users[i]] = _allowances[i];
+      }
   }
 
 }

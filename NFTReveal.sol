@@ -100,6 +100,10 @@ contract NFT is ERC721Enumerable, Ownable {
       revealed = true;
   }
 
+  function setRevealed(bool _revealed) public onlyOwner() {
+      revealed = _revealed;
+  }
+
   function setPrice(uint _newPrice) public onlyOwner() {
     price = _newPrice;
   }
