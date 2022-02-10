@@ -11,7 +11,7 @@ contract NFTAirdropV2 is ERC721Enumerable, Ownable {
   using Counters for Counters.Counter;
 
   uint public maxSupply = 10000;
-  bool public airdropIsActive; 
+  bool public isAirdropActive; 
 
 //   mapping(address => bool) public isWhitelistedForAirdrop; // same allowance for all
   mapping(address => uint) public airdropAllowance; // variable allowance per address
@@ -21,6 +21,7 @@ contract NFTAirdropV2 is ERC721Enumerable, Ownable {
   constructor() ERC721("NFT", "NFT") {}
   
   function claimAirdrop() public {
+    require(isAirdropActive, "Airdrop is inactive");  
     uint _allowance = airdropAllowance[msg.sender];
     require(_allowance > 0, "You have no airdrops to claim");
     require(_tokenId.current() + _allowance <= maxSupply, "Max supply exceeded");
@@ -31,8 +32,8 @@ contract NFTAirdropV2 is ERC721Enumerable, Ownable {
     airdropAllowance[msg.sender] = 0;
   }
 
-  function flipAirdropState() public onlyOwner {
-    airdropIsActive = !airdropIsActive;
+  function setAirdropActive(bool _state) public onlyOwner {
+    isAirdropActive = _state;
   }
 
   function setAirdropAllowance(address[] memory _users, uint[] memory _allowances) public onlyOwner {

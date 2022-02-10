@@ -27,11 +27,7 @@ contract NFT is ERC721Enumerable, Ownable {
     
   Counters.Counter private _tokenId;
 
-  constructor(
-    string memory _initBaseURI
-  ) ERC721("NFT", "NFT") {
-    setBaseURI(_initBaseURI);
-  }
+  constructor() ERC721("NFT", "NFT") {}
   
   function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
