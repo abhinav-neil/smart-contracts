@@ -8,10 +8,7 @@ contract WalletSplitter is PaymentSplitter, Ownable {
     
     string public name = "Wallet";
 
-    constructor (
-        address[] memory _payees, 
-        uint256[] memory _shares
-        ) 
+    constructor (address[] memory _payees, uint256[] memory _shares) 
         PaymentSplitter(_payees, _shares) payable {}
         
     function totalBalance() public view returns(uint) {
