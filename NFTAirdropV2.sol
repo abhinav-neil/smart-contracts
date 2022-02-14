@@ -1,4 +1,4 @@
-// Airdrop from ERC-721 contract w/ WL & claim model
+// Airdrop from ERC-721 contract w/ WL & claim (mint) model
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
