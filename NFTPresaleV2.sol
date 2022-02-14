@@ -1,13 +1,13 @@
-// NFT contract with presale/whitelist
+// @notice NFT contract with presale/whitelist, separate mint funcs & state variables for presale & public sale
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract NFT is ERC721Enumerable, Ownable {
+contract NFT is ERC721, Ownable {
   using Strings for uint;
   using Counters for Counters.Counter;
 
@@ -22,21 +22,13 @@ contract NFT is ERC721Enumerable, Ownable {
   // Presale
   uint public maxPresaleSupply = 1000;
   uint public maxPresaleMintAmount = 1;
-//   uint public presalePrice = 0.01 ether;
+  uint public presalePrice = 0.01 ether;
   bool public isPresaleActive;        
   mapping(address => bool) public isWhitelisted;
     
   Counters.Counter private _tokenId;
 
-  constructor(
-    string memory _initBaseURI
-  ) ERC721("NFT", "NFT") {
-    setBaseURI(_initBaseURI);
-  }
-  
-  function _baseURI() internal view virtual override returns (string memory) {
-    return baseURI;
-  }
+  constructor() ERC721("NFT", "NFT") {}
   
   function mintPresale(uint _mintAmount) public payable {
     require(isPresaleActive, "Presale is not active");
@@ -65,35 +57,10 @@ contract NFT is ERC721Enumerable, Ownable {
     }
   }
 
-  function walletOfOwner(address _owner)
-    public
-    view
-    returns (uint[] memory)
-  {
-    uint ownerTokenCount = balanceOf(_owner);
-    uint[] memory tokenIds = new uint[](ownerTokenCount);
-    for (uint i; i < ownerTokenCount; i++) {
-      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-    }
-    return tokenIds;
-  }
-
-  function tokenURI(uint tokenId)
-    public
-    view
-    virtual
-    override
-    returns (string memory)
-  {
-    require(
-      _exists(tokenId),
-      "ERC721Metadata: URI query for nonexistent token"
-    );
-
-    string memory currentBaseURI = _baseURI();
-    return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
-        : "";
+  function tokenURI(uint tokenId) public view virtual override returns (string memory) {
+    require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+    return bytes(baseURI).length > 0
+        ? string(abi.encodePacked(baseURI, tokenId.toString(), baseExtension)): "";
   }
 
   
@@ -109,12 +76,9 @@ contract NFT is ERC721Enumerable, Ownable {
     maxPresaleMintAmount = _newmaxPresaleMintAmount;
   }
 
-  function setBaseURI(string memory _newBaseURI) public onlyOwner {
-    baseURI = _newBaseURI;
-  }
-
-  function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
-    baseExtension = _newBaseExtension;
+  function setBaseURI(string memory _baseURI, string memory _baseExtension) public onlyOwner {
+    baseURI = _baseURI;
+    baseExtension = _baseExtension;
   }
 
   function flipSaleState() public onlyOwner {
@@ -127,19 +91,17 @@ contract NFT is ERC721Enumerable, Ownable {
 
   function whitelist(address[] memory _users) public onlyOwner {
       for(uint i = 0; i < _users.length; i++) {
-        //   require(!isWhitelisted[_users[i]], "already whitelisted");
           isWhitelisted[_users[i]] = true;
       }
   }
   
   function unWhitelist(address[] memory _users) public onlyOwner {
      for(uint i = 0; i < _users.length; i++) {
-        //   require(isWhitelisted[_users[i]], "not whitelisted");
           isWhitelisted[_users[i]] = false;
      }
   }
  
-  function withdraw() public payable onlyOwner {
+  function withdraw() public onlyOwner {
     (bool success, ) = payable(owner()).call{value: address(this).balance}("");
     require(success);
   }

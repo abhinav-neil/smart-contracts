@@ -1,14 +1,13 @@
-// NFT contract with presale/whitelist
-//store sale config (price, max tokens etc) in struct instead of individually, do not hard-code but set via setters 
+// @notice NFT contract with presale/whitelist, common mint func & sale config object for presale/public sale, values not hard coded by set via setters
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract NFT is ERC721Enumerable, Ownable {
+contract NFT is ERC721, Ownable {
   using Strings for uint;
   using Counters for Counters.Counter;
 
@@ -29,10 +28,6 @@ contract NFT is ERC721Enumerable, Ownable {
 
   constructor() ERC721("NFT", "NFT") {}
   
-  function _baseURI() internal view virtual override returns (string memory) {
-    return baseURI;
-  }
-  
   function mint(uint _mintAmount) public payable {
     require(sale.state != 0, "Sale is not active");
     if (sale.state == 1) {
@@ -48,35 +43,10 @@ contract NFT is ERC721Enumerable, Ownable {
     }
   }
 
-  function walletOfOwner(address _owner)
-    public
-    view
-    returns (uint[] memory)
-  {
-    uint ownerTokenCount = balanceOf(_owner);
-    uint[] memory tokenIds = new uint[](ownerTokenCount);
-    for (uint i; i < ownerTokenCount; i++) {
-      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-    }
-    return tokenIds;
-  }
-
-  function tokenURI(uint tokenId)
-    public
-    view
-    virtual
-    override
-    returns (string memory)
-  {
-    require(
-      _exists(tokenId),
-      "ERC721Metadata: URI query for nonexistent token"
-    );
-
-    string memory currentBaseURI = _baseURI();
-    return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
-        : "";
+  function tokenURI(uint tokenId) public view virtual override returns (string memory) {
+    require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+    return bytes(baseURI).length > 0
+        ? string(abi.encodePacked(baseURI, tokenId.toString(), baseExtension)): "";
   }
   
   function setSaleDetails(
@@ -91,12 +61,9 @@ contract NFT is ERC721Enumerable, Ownable {
           sale.price = _price;
   } 
 
-  function setBaseURI(string memory _newBaseURI) public onlyOwner {
-    baseURI = _newBaseURI;
-  }
-
-  function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
-    baseExtension = _newBaseExtension;
+  function setBaseURI(string memory _baseURI, string memory _baseExtension) public onlyOwner {
+    baseURI = _baseURI;
+    baseExtension = _baseExtension;
   }
 
   function whitelist(address[] memory _users) public onlyOwner {

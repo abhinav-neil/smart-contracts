@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
 
-contract NFTPaymentSplitter is ERC721, Ownable {
+contract NFTPaymentSplitter is ERC721, Ownable, PaymentSplitter {
     constructor(address[] memory _team, uint256[] memory _shares)
         ERC721("NFTPaymentSplitter", "NFTPS")
         PaymentSplitter(_team, _shares)
