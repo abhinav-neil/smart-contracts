@@ -21,6 +21,10 @@ contract NFT is ERC721, Ownable {
 
   constructor() ERC721("NFT", "NFT") {}
 
+  function totalSupply() public view returns (uint) {
+    return _tokenId.current();
+  }
+
   function mint(uint _mintAmount) public payable {
     require(saleIsActive, "Sale is not active");
     require(_mintAmount > 0, "You must mint at least 1 NFT");
@@ -33,10 +37,26 @@ contract NFT is ERC721, Ownable {
     }
   }
 
-function tokenURI(uint tokenId) public view virtual override returns (string memory) {
+  function tokenURI(uint tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
     return bytes(baseURI).length > 0
         ? string(abi.encodePacked(baseURI, tokenId.toString(), baseExtension)): "";
+  }
+
+  function walletOfOwner(address _owner) public view returns (uint[] memory) {
+    uint ownerTokenCount = balanceOf(_owner);
+    uint[] memory ownedTokenIds = new uint[](ownerTokenCount);
+    uint currentTokenId = 1;
+    uint ownedTokenIndex = 0;
+    while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
+      address currentTokenOwner = ownerOf(currentTokenId);
+      if (currentTokenOwner == _owner) {
+        ownedTokenIds[ownedTokenIndex] = currentTokenId;
+        ownedTokenIndex++;
+      }
+      currentTokenId++;
+    }
+    return ownedTokenIds;
   }
 
   function setPrice(uint _newPrice) public onlyOwner() {
