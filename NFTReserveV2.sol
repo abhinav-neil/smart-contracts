@@ -8,7 +8,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTReserve is ERC721, Ownable {
   uint public maxPublicSupply;
+  uint public maxReserveSupply;
   uint public maxSupply;
+  uint public reserveSupply;
+  uint public publicSupply;
   uint private _reserveTokenId = maxPublicSupply+1;
 
 constructor() ERC721("NFT", "NFT") {}
@@ -23,6 +26,15 @@ constructor() ERC721("NFT", "NFT") {}
         _safeMint(_to, _reserveTokenId + i);
     }
     _reserveTokenId += _alllowance;
+  }
+
+  function giftSpecial(address _to, uint[] memory _tokenIds) public onlyOwner {
+    uint _numTokens = _tokenIds.length;
+    require(reserveSupply + _numTokens <= maxReserveSupply, "Max reserve supply exceeded");
+    for (uint i = 0; i < _numTokens; i++) {
+        _safeMint(_to, _tokenIds[i]);
+    }
+    reserveSupply += _numTokens;
   }
 
   function batchGift(address[] calldata _recipients, uint8[] calldata _alllowances) public onlyOwner {
