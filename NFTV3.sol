@@ -9,12 +9,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract NFT is ERC721, Ownable {
   using Strings for uint;
 
+  bool public saleIsActive;
   string public baseURI;
   string public baseExtension;
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
   uint public maxTokensPerAddress = 10;
-  bool public saleIsActive;
   uint public supply;
 
   constructor() ERC721("NFT", "NFT") {}
@@ -53,8 +53,8 @@ contract NFT is ERC721, Ownable {
     return ownedTokenIds;
   }
 
-  function setPrice(uint _newPrice) public onlyOwner() {
-    price = _newPrice;
+  function flipSaleState() public onlyOwner {
+    saleIsActive = !saleIsActive;
   }
 
   function setBaseURI(string memory _baseURI, string memory _baseExtension) public onlyOwner {
@@ -62,11 +62,15 @@ contract NFT is ERC721, Ownable {
     baseExtension = _baseExtension;
   }
 
-  function flipSaleState() public onlyOwner {
-    saleIsActive = !saleIsActive;
+  function setMaxTokensPerAddress(uint _newMaxTokensPerAddress) public onlyOwner {
+      maxTokensPerAddress = _newMaxTokensPerAddress;
+  }
+
+  function setPrice(uint _newPrice) public onlyOwner {
+    price = _newPrice;
   }
  
-  function withdraw() public payable onlyOwner {
+  function withdraw() public onlyOwner {
     (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
     require(success, "Withdrawal of funds failed");
   }
