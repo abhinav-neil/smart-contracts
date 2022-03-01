@@ -1,7 +1,6 @@
-// @notice NFT contract using ERC721a
-// SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.12;
 
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -9,13 +8,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract NFTa is ERC721A, Ownable {
   using Strings for uint;
 
-  string private _baseURI;
-  string private _baseExtension;
+  string private baseURI;
+  string private baseExtension;
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
   uint public maxTokensPerAddress = 10;
   bool public saleIsActive;
-  uint public supply;
 
   constructor() ERC721A("NFTa", "NFTa") {}
 
@@ -30,39 +28,27 @@ contract NFTa is ERC721A, Ownable {
 
   function tokenURI(uint tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
-    return bytes(_baseURI).length > 0
-        ? string(abi.encodePacked(_baseURI, tokenId.toString(), _baseExtension)): "";
+    return bytes(baseURI).length > 0
+        ? string(abi.encodePacked(baseURI, tokenId.toString(), baseExtension)): "";
   }
 
-//   function walletOfOwner(address _owner) public view returns (uint[] memory) {
-//     uint ownerTokenCount = balanceOf(_owner);
-//     uint[] memory ownedTokenIds = new uint[](ownerTokenCount);
-//     uint currentTokenId = 1;
-//     uint ownedTokenIndex = 0;
-//     while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
-//       address currentTokenOwner = ownerOf(currentTokenId);
-//       if (currentTokenOwner == _owner) {
-//         ownedTokenIds[ownedTokenIndex] = currentTokenId;
-//         ownedTokenIndex++;
-//       }
-//       currentTokenId++;
-//     }
-//     return ownedTokenIds;
-//   }
-
-  function setPrice(uint _newPrice) public onlyOwner() {
-    price = _newPrice;
-  }
-
-  function setBaseURI(string memory _newBaseURI, string memory _newBaseExtension) public onlyOwner {
-    _baseURI = _newBaseURI;
-    _baseExtension = _newBaseExtension;
+  function setBaseURI(string memory _baseURI, string memory _baseExtension) public onlyOwner {
+    baseURI = _baseURI;
+    baseExtension = _baseExtension;
   }
 
   function flipSaleState() public onlyOwner {
     saleIsActive = !saleIsActive;
   }
  
+  function setPrice(uint _newPrice) public onlyOwner() {
+    price = _newPrice;
+  }
+
+  function setMaxTokensPerAddress(uint _newMaxTokensPerAddress) public onlyOwner() {
+      maxTokensPerAddress = _newMaxTokensPerAddress;
+  }
+
   function withdraw() public onlyOwner {
     (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
     require(success, "Withdrawal of funds failed");
