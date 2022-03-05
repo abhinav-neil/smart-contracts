@@ -8,14 +8,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract NFTa is ERC721A, Ownable {
   using Strings for uint;
 
-  string private baseURI;
-  string private baseExtension;
+  string public baseURI;
+  string public baseExtension;
   uint public price = 0.01 ether;
   uint public maxSupply = 10000;
   uint public maxTokensPerAddress = 10;
   bool public saleIsActive;
 
   constructor() ERC721A("NFTa", "NFTa") {}
+
+  function _startTokenId() internal view virtual override returns (uint256) {
+        return 1;
+  }
 
   function mint(uint _mintAmount) public payable {
     require(saleIsActive, "Sale is not active");
