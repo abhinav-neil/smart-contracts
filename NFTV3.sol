@@ -21,9 +21,8 @@ contract NFT is ERC721, Ownable {
 
   function mint(uint _mintAmount) public payable {
     require(saleIsActive, "Sale is not active");
-    require(_mintAmount > 0, "You must mint at least 1 NFT");
+    require(_mintAmount > 0 && balanceOf(msg.sender) + _mintAmount <= maxTokensPerAddress, "Invalid mint amount");
     require(supply + _mintAmount <= maxSupply, "Not enough supply");
-    require(balanceOf(msg.sender) + _mintAmount <= maxTokensPerAddress, "Max tokens per address limit exceeded");
     require(msg.value >= price * _mintAmount, "Please send the correct amount of ETH");
     for (uint i = 0; i < _mintAmount; ++i) {
         _safeMint(msg.sender, supply + i);
